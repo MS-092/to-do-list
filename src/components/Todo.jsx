@@ -1,13 +1,12 @@
 import React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPenToSquare } from '@fortawesome/free-solid-svg-icons'
-import { faTrash } from '@fortawesome/free-solid-svg-icons'
+import { faPenToSquare, faTrash } from '@fortawesome/free-solid-svg-icons'
 
-export const Todo = ({task, toggleComplete, deleteToDo, editToDo}) => {
+export const Todo = ({ task, toggleComplete, deleteToDo, editToDo, openTask }) => {
     return (
         <div className="Todo" key={task.id}>
-            <p
-                className={`${task.completed ? 'completed' : ""}`}>{task.task}
+            <p className={`${task.completed ? 'completed' : ""}`} onClick={() => openTask(task.id)}>
+                {task.task} - <span className={`priority-${task.priority}`}>{task.priority}</span>
             </p>
 
             <div>
@@ -20,12 +19,18 @@ export const Todo = ({task, toggleComplete, deleteToDo, editToDo}) => {
 
                 <FontAwesomeIcon
                     icon={faPenToSquare}
-                    onClick={() => editToDo(task.id)}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        editToDo(task.id);
+                    }}
                 />
 
                 <FontAwesomeIcon
                     icon={faTrash}
-                    onClick={() => deleteToDo(task.id)}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        deleteToDo(task.id);
+                    }}
                 />
             </div>
         </div>

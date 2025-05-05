@@ -4,28 +4,29 @@ import { Todo } from './Todo.jsx';
 import { TodoForm } from './TodoForm.jsx';
 import { v4 as uuidv4 } from 'uuid';
 import { EditTodoForm } from './EditTodoForm.jsx';
+import { TaskModal } from './TaskModal.jsx';
 
 uuidv4();
 
 export const TodoWrapper = () => {
     const [toDos, setToDos] = useState([])
     const [showCompleted, setShowCompleted] = useState(false);
+    const [selectedTask, setSelectedTask] = useState(null);
     const navigate = useNavigate();
 
-    const addToDo = toDo => {
+    const addToDo = (toDo, priority) => {
         setToDos([...toDos, {
             id: uuidv4(),
             task: toDo,
+            priority: priority,
             completed: false,
-            isEditing: false
+            isEditing: false,
+            date: null
         }]);
-
-        console.log(toDos);
     }
 
     const toggleComplete = id => {
-        setToDos(toDos.map(todo => todo.id === id ? {...
-        todo, completed: !todo.completed} : todo ))
+        setToDos(toDos.map(todo => todo.id === id ? { ...todo, completed: !todo.completed } : todo))
     }
 
     const deleteToDo = id => {
@@ -33,13 +34,11 @@ export const TodoWrapper = () => {
     }
 
     const editToDo = id => {
-        setToDos(toDos.map((todo) => todo.id === id ? {...
-            todo, isEditing: !todo.isEditing} : todo));
+        setToDos(toDos.map((todo) => todo.id === id ? { ...todo, isEditing: !todo.isEditing } : todo));
     }
 
-    const editTask = id => {
-        setToDos(toDos.map(todo => todo.id === id ? {...
-            todo, task, isEditing: !todo.isEditing} : todo));
+    const editTask = (value, id) => {
+        setToDos(toDos.map(todo => todo.id === id ? { ...todo, task: value, isEditing: !todo.isEditing } : todo));
     }
 
     const toggleCompletedFilter = () => {
@@ -48,7 +47,7 @@ export const TodoWrapper = () => {
 
     const filteredTasks = showCompleted
         ? toDos.filter((todo) => todo.completed)
-        : toDos;
+        : toDos.filter((todo) => !todo.completed);
 
     const handleToggle = (todoId) => {
         setToDos((prevToDos) =>
@@ -62,10 +61,24 @@ export const TodoWrapper = () => {
         navigate('/profile')
     }
 
+    const openTask = (id) => {
+        const task = toDos.find(todo => todo.id === id);
+        setSelectedTask(task);
+    }
+
+    const closeTask = () => {
+        setSelectedTask(null);
+    }
+
+    const updateTask = (id, updatedTask) => {
+        setToDos(toDos.map(todo => todo.id === id ? updatedTask : todo));
+        closeTask();
+    }
+
     return (
         <div className="TodoWrapper">
             <button onClick={toggleCompletedFilter}>
-                {showCompleted ? 'Show All' : 'Show Completed'}
+                {showCompleted ? 'Show Tasks' : 'Show Completed'}
             </button>
 
             <TodoForm addToDo={addToDo} />
@@ -82,9 +95,17 @@ export const TodoWrapper = () => {
                         deleteToDo={deleteToDo}
                         editToDo={editToDo}
                         onToggle={handleToggle}
+                        openTask={openTask}
                     />
                 )
             ))}
+            {selectedTask && (
+                <TaskModal
+                    task={selectedTask}
+                    closeTask={closeTask}
+                    updateTask={updateTask}
+                />
+            )}
         </div>
     )
 }
